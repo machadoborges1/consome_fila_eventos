@@ -7,6 +7,7 @@ import (
 
 	"github.com/machadoborges1/consome_fila_eventos/configs"
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
+	"github.com/machadoborges1/consome_fila_eventos"
 
 	go_ora "github.com/sijms/go-ora/v2"
 )
