@@ -7,6 +7,7 @@ import (
 
 	"github.com/machadoborges1/consome_fila_eventos/configs"
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
+	"github.com/machadoborges1/consome_fila_eventos/internal/service"
 
 	go_ora "github.com/sijms/go-ora/v2"
 )
@@ -34,7 +35,7 @@ func main() {
 	}
 	fmt.Println("Conexão bem sucedida!")
 
-	dado, err := selectTCBContrFilaEventos(db)
+	dado, err := selectFirstTCBContrFilaEvento(db)
 	if err != nil {
 		log.Fatal("Erro ao selecionar dados:", err)
 	}
@@ -60,6 +61,8 @@ func main() {
 	}
 
 	print(vDt_Atual)
+
+	service.ProcessaItem(db, dado)
 	// Agora vDt_Atual contém o valor da data atual formatado como 'YYYYMMDD'
 
 }

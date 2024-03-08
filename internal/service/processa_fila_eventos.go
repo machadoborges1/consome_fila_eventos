@@ -1,15 +1,16 @@
 package service
 
 import (
+	"database/sql"
 	"fmt"
 
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
 )
 
-func ProcessaItem(evento *entity.TCBContrFilaEventos) error {
+func ProcessaItem(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	switch evento.TipoAcao.String {
 	case "BDT_FAT_GR":
-		processaBDTFatGR(evento)
+		processaBDTFatGR(db, evento)
 
 	case "BDT_FAT_PG":
 		processaBDTFatPG()
@@ -51,7 +52,6 @@ func ProcessaItem(evento *entity.TCBContrFilaEventos) error {
 		processaConfRea()
 
 	default:
-		return fmt.Errorf("Tipo de ação desconhecido: %s", evento.TipoAcao.String)
+		fmt.Printf("Tipo de ação desconhecido:")
 	}
-	return nil
 }
