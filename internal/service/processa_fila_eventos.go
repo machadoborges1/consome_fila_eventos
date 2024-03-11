@@ -10,7 +10,7 @@ import (
 func ProcessaItem(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	switch evento.TipoAcao.String {
 	case "BDT_FAT_GR":
-		processaBDTFatGR(db, evento)
+		ProcessaBDTFatGR(db, evento)
 
 	case "BDT_FAT_PG":
 		processaBDTFatPG()

@@ -7,7 +7,8 @@ import (
 
 	"github.com/machadoborges1/consome_fila_eventos/configs"
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
-	"github.com/machadoborges1/consome_fila_eventos/internal/service"
+
+	//"github.com/machadoborges1/consome_fila_eventos/internal/service"
 
 	go_ora "github.com/sijms/go-ora/v2"
 )
@@ -42,17 +43,8 @@ func main() {
 
 	// Exiba os dados selecionados
 	fmt.Println(dado)
-	// idEvento := int64(25852682504738455)
-	// evento, err := selectTCBContrFilaEventos(db, idEvento)
-	// if err != nil {
-	// 	log.Fatal("Erro ao recuperar evento:", err)
-	// }
 
-	// // Exiba os detalhes do evento
-	// fmt.Println("Detalhes do Evento:")
-	// fmt.Println("ID do Evento:", evento.IDEvento)
-	// fmt.Println("Tipo de Ação:", evento.TipoAcao)
-	// fmt.Println("Status:", evento.Status)
+	//service.ProcessaBDTFatGR(db, dado)
 
 	var vDt_Atual string
 	row := db.QueryRow("SELECT TO_CHAR(SYSDATE, 'YYYYMMDD') FROM DUAL")
@@ -60,10 +52,47 @@ func main() {
 		log.Fatal(err)
 	}
 
-	print(vDt_Atual)
+	var fsGetIdAlt int64
+	roww := db.QueryRow("SELECT FS_GET_ID_ALT FROM DUAL")
+	if err := roww.Scan(&fsGetIdAlt); err != nil {
+		log.Fatal(err)
+	}
 
-	service.ProcessaItem(db, dado)
-	// Agora vDt_Atual contém o valor da data atual formatado como 'YYYYMMDD'
+	fmt.Println(vDt_Atual)
+	fmt.Println(fsGetIdAlt)
+	var vMensErro string
+	var vNroSequencial int64
+
+	// fmt.Println(vDt_Atual,
+	// 	dado.CodPeriodo.String,
+	// 	dado.CodPessoa.Int64,
+	// 	dado.CodFipGf.Int64,
+	// 	dado.CodGrupoFin.String,
+	// 	dado.CodServico.Int64,
+	// 	dado.CodParcela.String,
+	// 	"N",
+	// 	vNroSequencial,
+	// 	vMensErro)
+
+	result, err := db.Exec("CALL PCB_GERA_PREVISTO_MOV(:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)",
+		vDt_Atual,
+		dado.CodPeriodo.String,
+		dado.CodPessoa.Int64,
+		dado.CodFipGf.Int64,
+		dado.CodGrupoFin.String,
+		dado.CodServico.Int64,
+		dado.CodParcela.String,
+		"N",
+		vNroSequencial,
+		vMensErro)
+	fmt.Println(vMensErro)
+	if err != nil {
+		fmt.Println("erro1")
+		log.Fatal(err)
+	} else {
+		fmt.Println(result)
+		fmt.Printf("okkkkkk")
+	}
 
 }
 
