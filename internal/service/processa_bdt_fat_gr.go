@@ -81,6 +81,7 @@ func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 		tx.Rollback()
 	}
 
+
 	if vMensErro == "" {
 		_, err := db.Exec(`DELETE FROM TCB_CONTR_FILA_EVENTOS
 			WHERE STATUS IN ('P','E')
@@ -97,6 +98,7 @@ func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 			fmt.Println("erro7")
 			log.Fatal(err)
 		} else {
+			tx.Commit()
 			fmt.Println("Deletado")
 		}
 
@@ -107,6 +109,7 @@ func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 			fmt.Println("erro8")
 			log.Fatal(err)
 		} else {
+			tx.Commit()
 			fmt.Println("inserido na tabela")
 		}
 

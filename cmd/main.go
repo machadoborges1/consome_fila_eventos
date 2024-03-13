@@ -44,7 +44,10 @@ func main() {
 	// Exiba os dados selecionados
 	fmt.Println(dado)
 
-	service.ProcessaBDTFatGR(db, dado)
+
+
+	//service.ProcessaBDTFatGR(db, dado)
+	service.TravaBDTFatGR(db, dado)
 
 	/////////////////////////////////////////////////////////////
 
