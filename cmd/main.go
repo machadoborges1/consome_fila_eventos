@@ -8,7 +8,7 @@ import (
 	"github.com/machadoborges1/consome_fila_eventos/configs"
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
 
-	//"github.com/machadoborges1/consome_fila_eventos/internal/service"
+	"github.com/machadoborges1/consome_fila_eventos/internal/service"
 
 	go_ora "github.com/sijms/go-ora/v2"
 )
@@ -44,39 +44,24 @@ func main() {
 	// Exiba os dados selecionados
 	fmt.Println(dado)
 
-	//service.ProcessaBDTFatGR(db, dado)
-
-	var vDt_Atual string
-	row := db.QueryRow("SELECT TO_CHAR(SYSDATE, 'YYYYMMDD') FROM DUAL")
-	if err := row.Scan(&vDt_Atual); err != nil {
-		log.Fatal(err)
-	}
-
-	var fsGetIdAlt int64
-	roww := db.QueryRow("SELECT FS_GET_ID_ALT FROM DUAL")
-	if err := roww.Scan(&fsGetIdAlt); err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println(vDt_Atual)
-	fmt.Println(fsGetIdAlt)
+	service.ProcessaBDTFatGR(db, dado)
 
 	/////////////////////////////////////////////////////////////
 
-	var saida string
+	// var saida string
 
-	stmt, err := db.Prepare("BEGIN InserirValor(:1, :2, :3); END;")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer stmt.Close()
+	// stmt, err := db.Prepare("BEGIN InserirValor(:1, :2, :3); END;")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// defer stmt.Close()
 
-	_, err = stmt.Exec(55, "Exempl013333", go_ora.Out{Dest: &saida, Size: 200})
-	if err != nil {
-		log.Fatal(err)
-	}
+	// _, err = stmt.Exec(55, "Exempl013333", go_ora.Out{Dest: &saida, Size: 200})
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
 
-	fmt.Println("Valor de saida após a execução da procedure:", saida)
+	// fmt.Println("Valor de saida após a execução da procedure:", saida)
 
 	//////////////////////////////////////////////////////////////
 
