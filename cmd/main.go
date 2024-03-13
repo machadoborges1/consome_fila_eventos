@@ -60,8 +60,28 @@ func main() {
 
 	fmt.Println(vDt_Atual)
 	fmt.Println(fsGetIdAlt)
-	var vMensErro string
-	var vNroSequencial int64
+
+	/////////////////////////////////////////////////////////////
+
+	var saida string
+
+	stmt, err := db.Prepare("BEGIN InserirValor(:1, :2, :3); END;")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(55, "Exempl013333", go_ora.Out{Dest: &saida, Size: 200})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Valor de saida após a execução da procedure:", saida)
+
+	//////////////////////////////////////////////////////////////
+
+	//var vMensErro string
+	//var vNroSequencial int64
 
 	// fmt.Println(vDt_Atual,
 	// 	dado.CodPeriodo.String,
@@ -74,26 +94,38 @@ func main() {
 	// 	vNroSequencial,
 	// 	vMensErro)
 
-	result, err := db.Exec("CALL PCB_GERA_PREVISTO_MOV(:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)",
-		vDt_Atual,
-		dado.CodPeriodo.String,
-		dado.CodPessoa.Int64,
-		dado.CodFipGf.Int64,
-		dado.CodGrupoFin.String,
-		dado.CodServico.Int64,
-		dado.CodParcela.String,
-		"N",
-		vNroSequencial,
-		vMensErro)
-	fmt.Println(vMensErro)
-	if err != nil {
-		fmt.Println("erro1")
-		log.Fatal(err)
-	} else {
-		fmt.Println(result)
-		fmt.Printf("okkkkkk")
-	}
+	// result, err := db.Exec("CALL PCB_GERA_PREVISTO_MOV(:1, :2, :3, :4, :5, :6, :7, :8, :9, :10)",
+	// 	vDt_Atual,
+	// 	dado.CodPeriodo.String,
+	// 	dado.CodPessoa.Int64,
+	// 	dado.CodFipGf.Int64,
+	// 	dado.CodGrupoFin.String,
+	// 	dado.CodServico.Int64,
+	// 	dado.CodParcela.String,
+	// 	"N",
+	// 	vNroSequencial,
+	// 	vMensErro)
+	// fmt.Println(vMensErro)
+	// if err != nil {
+	// 	fmt.Println("erro1")
+	// 	log.Fatal(err)
+	// } else {
+	// 	fmt.Println(result)
+	// 	fmt.Printf("okkkkkk")
+	// }
 
+	// var num int
+	// num = 7
+	// var sauda string
+
+	// oi, err := db.Exec("BEGIN VerificaNumero(:1, :2);END;", num, sauda)
+	// if err != nil {
+	// 	fmt.Print(oi)
+	// 	log.Fatal(err)
+	// }
+
+	// // Imprima a saudação
+	// fmt.Println("Saudação:", sauda)
 }
 
 // func selectTCBContrFilaEventos(db *sql.DB, id int64) (*entity.TCBContrFilaEventos, error) {
