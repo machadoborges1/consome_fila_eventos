@@ -1,0 +1,51 @@
+FUNCTION TRAVA_BDT_FAT_GR RETURN BOOLEAN IS
+    vRetorno BOOLEAN;
+  BEGIN
+    vTipo_Acao := 'BDT_FAT_GR';
+	
+    UPDATE TCB_CONTR_FILA_EVENTOS
+	SET STATUS = 'P'
+	   ,AUDSID = vAudSID
+	   ,DTH_INICIO_PROCESSAMENTO = SYSDATE
+	WHERE STATUS = 'A'
+	  AND TIPO_ACAO = vTipo_Acao
+	  AND ID_EVENTO <= vId_Atual
+	  AND COD_PERIODO   = v_Dados.COD_PERIODO
+	  AND COD_PESSOA    = v_Dados.COD_PESSOA
+	  AND COD_FIP_GF    = v_Dados.COD_FIP_GF
+	  AND COD_GRUPO_FIN = v_Dados.COD_GRUPO_FIN
+	  AND COD_SERVICO   = v_Dados.COD_SERVICO
+	  AND COD_PARCELA   = v_Dados.COD_PARCELA
+	  AND NOT EXISTS (SELECT *
+	                  FROM TCB_CONTR_FILA_EVENTOS
+					  WHERE STATUS = 'P'
+					    AND AUDSID IS NOT NULL
+					    AND AUDSID <> vAudSID
+						AND TIPO_ACAO = vTipo_Acao
+                        AND COD_PERIODO   = v_Dados.COD_PERIODO
+                        AND COD_PESSOA    = v_Dados.COD_PESSOA
+                        AND COD_FIP_GF    = v_Dados.COD_FIP_GF
+                        AND COD_GRUPO_FIN = v_Dados.COD_GRUPO_FIN
+                        AND COD_SERVICO   = v_Dados.COD_SERVICO
+                        AND COD_PARCELA   = v_Dados.COD_PARCELA
+					 );
+					
+    vRetorno := SQL%ROWCOUNT > 0;
+	IF vRetorno
+    THEN COMMIT;	
+	ELSE ROLLBACK;
+         UPDATE TCB_CONTR_FILA_EVENTOS
+	     SET NRO_ITERACOES = NRO_ITERACOES + 1
+         WHERE STATUS = 'A'
+	       AND TIPO_ACAO = vTipo_Acao
+	       AND ID_EVENTO <= vId_Atual
+	       AND COD_PERIODO   = v_Dados.COD_PERIODO
+	       AND COD_PESSOA    = v_Dados.COD_PESSOA
+	       AND COD_FIP_GF    = v_Dados.COD_FIP_GF
+	       AND COD_GRUPO_FIN = v_Dados.COD_GRUPO_FIN
+	       AND COD_SERVICO   = v_Dados.COD_SERVICO
+	       AND COD_PARCELA   = v_Dados.COD_PARCELA;
+         COMMIT;
+	END IF;
+	RETURN vRetorno;
+  END;  

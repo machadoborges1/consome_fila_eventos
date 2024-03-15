@@ -11,6 +11,12 @@ import (
 func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	vTipoAcao := "BDT_FAT_GR"
 
+	tx, err := db.Begin()
+	if err != nil {
+		fmt.Println("Erro ao iniciar a transação:", err)
+		return
+	}
+
 	var vAudSID int64
 	roww := db.QueryRow("SELECT USERENV('SESSIONID') FROM DUAL")
 	if err := roww.Scan(&vAudSID); err != nil {
@@ -94,9 +100,39 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 		log.Fatal(err)
 	}
 
-    if rowsAffected > 0 {
-		fmt.Println("Operação bem-sucedida. Linhas afetadas:", rowsAffected)
+	if rowsAffected > 0 {
+		err = tx.Commit()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Commit realizado. Linhas afetadas:", rowsAffected)
 	} else {
-		fmt.Println("Nenhuma linha afetada.")
+		err = tx.Rollback()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println("Rollback realizado. Nenhuma linha afetada.")
+
+		stmt, err := db.Prepare("UPDATE TCB_CONTR_FILA_EVENTOS " +
+			"SET NRO_ITERACOES = NRO_ITERACOES + 1 " +
+			"WHERE STATUS = 'A' " +
+			"AND TIPO_ACAO = :1 " +
+			"AND ID_EVENTO <= :2 " +
+			"AND COD_PERIODO = :3 " +
+			"AND COD_PESSOA = :4 " +
+			"AND COD_FIP_GF = :5 " +
+			"AND COD_GRUPO_FIN = :6 " +
+			"AND COD_SERVICO = :7 " +
+			"AND COD_PARCELA = :8")
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer stmt.Close()
+
+		_, err = stmt.Exec(vTipoAcao, fsGetIdAlt, evento.CodPeriodo.String, evento.CodPessoa.Int64,
+			evento.CodFipGf.Int64, evento.CodGrupoFin.String, evento.CodServico.Int64, evento.CodParcela.String)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }
