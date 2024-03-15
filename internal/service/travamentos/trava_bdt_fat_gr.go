@@ -9,7 +9,6 @@ import (
 )
 
 func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
-
 	vTipoAcao := "BDT_FAT_GR"
 
 	var vAudSID int64
@@ -19,8 +18,8 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 		log.Fatal(err)
 	}
 
-	var vDt_Atual string
-	row := db.QueryRow("SELECT TO_CHAR(SYSDATE, 'YYYYMMDD') FROM DUAL")
+	var vDt_Atual sql.NullTime
+	row := db.QueryRow("SELECT SYSDATE FROM DUAL")
 	if err := row.Scan(&vDt_Atual); err != nil {
 		fmt.Println("erro4")
 		log.Fatal(err)
@@ -31,7 +30,7 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	if err := rowww.Scan(&fsGetIdAlt); err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(fsGetIdAlt)
+	fmt.Println(vDt_Atual.Time)
 
 	stmt, err := db.Prepare(`
         UPDATE TCB_CONTR_FILA_EVENTOS
@@ -68,17 +67,36 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(
-		vAudSID, vDt_Atual, vTipoAcao,
-		fsGetIdAlt, evento.CodPeriodo.String, evento.CodPessoa.Int64, evento.CodFipGf.Int64, evento.CodGrupoFin.String, evento.CodServico.Int64,
-		evento.CodParcela.String, vAudSID, vTipoAcao,
-		evento.CodPeriodo.String, evento.CodPessoa.Int64, evento.CodFipGf.Int64, evento.CodGrupoFin.String, evento.CodServico.Int64, evento.CodParcela.String,
-		vAudSID, // Adicionando valor para :18
+	result, err := stmt.Exec(
+		vAudSID, vDt_Atual.Time, vTipoAcao,
+		fsGetIdAlt,
+		evento.CodPeriodo.String,
+		evento.CodPessoa.Int64,
+		evento.CodFipGf.Int64,
+		evento.CodGrupoFin.String,
+		evento.CodServico.Int64,
+		evento.CodParcela.String,
+		vAudSID, vTipoAcao,
+		evento.CodPeriodo.String,
+		evento.CodPessoa.Int64,
+		evento.CodFipGf.Int64,
+		evento.CodGrupoFin.String,
+		evento.CodServico.Int64,
+		evento.CodParcela.String,
 	)
-
 	if err != nil {
 		fmt.Println("erro2")
 		log.Fatal(err)
 	}
 
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+    if rowsAffected > 0 {
+		fmt.Println("Operação bem-sucedida. Linhas afetadas:", rowsAffected)
+	} else {
+		fmt.Println("Nenhuma linha afetada.")
+	}
 }

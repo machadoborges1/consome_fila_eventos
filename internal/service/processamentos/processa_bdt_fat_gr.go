@@ -58,7 +58,7 @@ func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	if err != nil {
 		log.Fatal(err)
 	} else {
-		fmt.Println(vNroSequencial, vMensErro)
+		fmt.Println(vDt_Atual)
 	}
 
 	if vMensErro == "" {

@@ -7,8 +7,7 @@ import (
 
 	"github.com/machadoborges1/consome_fila_eventos/configs"
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
-
-	"github.com/machadoborges1/consome_fila_eventos/internal/service"
+	"github.com/machadoborges1/consome_fila_eventos/internal/service/travamentos"
 
 	go_ora "github.com/sijms/go-ora/v2"
 )
@@ -43,8 +42,6 @@ func main() {
 
 	// Exiba os dados selecionados
 	fmt.Println(dado)
-
-
 
 	//service.ProcessaBDTFatGR(db, dado)
 	service.TravaBDTFatGR(db, dado)
