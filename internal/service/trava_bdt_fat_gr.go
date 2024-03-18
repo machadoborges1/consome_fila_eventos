@@ -8,7 +8,7 @@ import (
 	"github.com/machadoborges1/consome_fila_eventos/internal/entity"
 )
 
-func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
+func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos, audSID int64, fsGetIdAlt int64) {
 	vTipoAcao := "BDT_FAT_GR"
 
 	tx, err := db.Begin()
@@ -17,54 +17,33 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 		return
 	}
 
-	var vAudSID int64
-	roww := db.QueryRow("SELECT USERENV('SESSIONID') FROM DUAL")
-	if err := roww.Scan(&vAudSID); err != nil {
-		fmt.Println("erro3")
-		log.Fatal(err)
-	}
-
-	var vDt_Atual sql.NullTime
-	row := db.QueryRow("SELECT SYSDATE FROM DUAL")
-	if err := row.Scan(&vDt_Atual); err != nil {
-		fmt.Println("erro4")
-		log.Fatal(err)
-	}
-
-	var fsGetIdAlt int64
-	rowww := db.QueryRow("SELECT FS_GET_ID_ALT FROM DUAL")
-	if err := rowww.Scan(&fsGetIdAlt); err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(vDt_Atual.Time)
-
 	stmt, err := db.Prepare(`
         UPDATE TCB_CONTR_FILA_EVENTOS
         SET STATUS = 'P'
            ,AUDSID = :1
-           ,DTH_INICIO_PROCESSAMENTO = :2
+           ,DTH_INICIO_PROCESSAMENTO = SYSDATE
         WHERE STATUS = 'A'
-          AND TIPO_ACAO = :3
-          AND ID_EVENTO <= :4
-          AND COD_PERIODO   = :5
-          AND COD_PESSOA    = :6
-          AND COD_FIP_GF    = :7
-          AND COD_GRUPO_FIN = :8
-          AND COD_SERVICO   = :9
-          AND COD_PARCELA   = :10
+          AND TIPO_ACAO = :2
+          AND ID_EVENTO <= :3
+          AND COD_PERIODO   = :4
+          AND COD_PESSOA    = :5
+          AND COD_FIP_GF    = :6
+          AND COD_GRUPO_FIN = :7
+          AND COD_SERVICO   = :8
+          AND COD_PARCELA   = :9
           AND NOT EXISTS (
               SELECT *
               FROM TCB_CONTR_FILA_EVENTOS
               WHERE STATUS = 'P'
                 AND AUDSID IS NOT NULL
-                AND AUDSID <> :11
-                AND TIPO_ACAO = :12
-                AND COD_PERIODO   = :13
-                AND COD_PESSOA    = :14
-                AND COD_FIP_GF    = :15
-                AND COD_GRUPO_FIN = :16
-                AND COD_SERVICO   = :17
-                AND COD_PARCELA   = :18
+                AND AUDSID <> :10
+                AND TIPO_ACAO = :11
+                AND COD_PERIODO   = :12
+                AND COD_PESSOA    = :13
+                AND COD_FIP_GF    = :14
+                AND COD_GRUPO_FIN = :15
+                AND COD_SERVICO   = :16
+                AND COD_PARCELA   = :17
           )
     `)
 	if err != nil {
@@ -73,8 +52,7 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 	}
 	defer stmt.Close()
 
-	result, err := stmt.Exec(
-		vAudSID, vDt_Atual.Time, vTipoAcao,
+    fmt.Println(		audSID, vTipoAcao,
 		fsGetIdAlt,
 		evento.CodPeriodo.String,
 		evento.CodPessoa.Int64,
@@ -82,7 +60,24 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 		evento.CodGrupoFin.String,
 		evento.CodServico.Int64,
 		evento.CodParcela.String,
-		vAudSID, vTipoAcao,
+		audSID, vTipoAcao,
+		evento.CodPeriodo.String,
+		evento.CodPessoa.Int64,
+		evento.CodFipGf.Int64,
+		evento.CodGrupoFin.String,
+		evento.CodServico.Int64,
+		evento.CodParcela.String,)
+
+	result, err := stmt.Exec(
+		audSID, vTipoAcao,
+		fsGetIdAlt,
+		evento.CodPeriodo.String,
+		evento.CodPessoa.Int64,
+		evento.CodFipGf.Int64,
+		evento.CodGrupoFin.String,
+		evento.CodServico.Int64,
+		evento.CodParcela.String,
+		audSID, vTipoAcao,
 		evento.CodPeriodo.String,
 		evento.CodPessoa.Int64,
 		evento.CodFipGf.Int64,
@@ -112,6 +107,9 @@ func TravaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos) {
 			log.Fatal(err)
 		}
 		fmt.Println("Rollback realizado. Nenhuma linha afetada.")
+
+        fmt.Println(vTipoAcao, fsGetIdAlt, evento.CodPeriodo.String, evento.CodPessoa.Int64,
+			evento.CodFipGf.Int64, evento.CodGrupoFin.String, evento.CodServico.Int64, evento.CodParcela.String)
 
 		stmt, err := db.Prepare("UPDATE TCB_CONTR_FILA_EVENTOS " +
 			"SET NRO_ITERACOES = NRO_ITERACOES + 1 " +
