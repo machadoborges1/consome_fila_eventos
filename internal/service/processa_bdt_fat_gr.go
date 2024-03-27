@@ -9,7 +9,7 @@ import (
 	go_ora "github.com/sijms/go-ora/v2"
 )
 
-func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos, vDt_Atual string) {
+func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos, vDt_Atual string, fsGetIdAlt int64) {
 
 	var vMensErro string
 	var vNroSequencial int64
@@ -20,12 +20,6 @@ func ProcessaBDTFatGR(db *sql.DB, evento entity.TCBContrFilaEventos, vDt_Atual s
 	if err != nil {
 		fmt.Println("Erro ao iniciar a transação:", err)
 		return
-	}
-
-	var fsGetIdAlt int64
-	roww := db.QueryRow("SELECT FS_GET_ID_ALT FROM DUAL")
-	if err := roww.Scan(&fsGetIdAlt); err != nil {
-		log.Fatal(err)
 	}
 
 	stmt, err := db.Prepare("BEGIN " +

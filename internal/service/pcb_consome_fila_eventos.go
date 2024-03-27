@@ -13,7 +13,6 @@ func PcbConsomeFilaEventos(db *sql.DB) bool {
 		log.Fatal("Erro ao selecionar dados:", err)
 		return false
 	}
-	fmt.Println()
 
 	var vDt_Atual string
 	row := db.QueryRow("SELECT TO_CHAR(SYSDATE, 'YYYYMMDD') FROM DUAL")
@@ -41,9 +40,13 @@ func PcbConsomeFilaEventos(db *sql.DB) bool {
 		log.Fatal(err)
 	}
 
-	fmt.Println(dado, vAudSID, vDt_Atual, fsGetIdAlt)
+	fmt.Println(dado)
+
+	//TravaBDTFatGRr(db, dado, vAudSID, fsGetIdAlt)
 	TravaBDTFatGR(db, dado, vAudSID, fsGetIdAlt)
 
-	return true
 
+	//ProcessaBDTFatGR(db, dado, vDt_Atual, fsGetIdAlt)
+
+	return true
 }

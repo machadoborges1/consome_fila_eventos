@@ -36,6 +36,25 @@ func main() {
 	fmt.Println("Conexão bem sucedida!")
 	service.PcbConsomeFilaEventos(db)
 
+	// var count int
+	// err = db.QueryRow("SELECT COUNT(*) FROM Exemplo").Scan(&count)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// fmt.Printf("Saída da procedure: %s\n", saida)
+
+	// // Chame a função alterarPorID
+	// id := 12                         // ID da linha que deseja alterar
+	// novoNome := "NovoNooooooooooome" // Novo nome para atribuir à linha
+
+	// rowsAffected, err := alterarPorID(db, id, novoNome)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	// fmt.Printf("Número de linhas modificadas: %d\n", rowsAffected)
+
 	// Exiba os dados selecionados
 
 	//service.ProcessaBDTFatGR(db, dado)
@@ -298,3 +317,45 @@ func selectDistinctNroSeqRea(db *sql.DB, nroSeqFat int64) ([]int64, error) {
 
 // 	return retorno, nil
 // }
+
+func chamarProcedure(db *sql.DB, id int, nome string) (string, error) {
+	var saida string
+
+	// Preparar a chamada da procedure
+	stmt, err := db.Prepare("BEGIN InserirValor(:1, :2, :3); END;")
+	if err != nil {
+		return "", err
+	}
+	defer stmt.Close()
+
+	// Executar a procedure
+	_, err = stmt.Exec(id, nome, go_ora.Out{Dest: &saida, Size: 200})
+	if err != nil {
+		return "", err
+	}
+
+	return saida, nil
+}
+
+func alterarPorID(db *sql.DB, id int, novoNome string) (int64, error) {
+	// Preparar a declaração SQL para atualização
+	stmt, err := db.Prepare("UPDATE Exemplo SET Nome = :1 WHERE ID = :2")
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+
+	// Executar a declaração SQL
+	result, err := stmt.Exec(novoNome, id)
+	if err != nil {
+		return 0, err
+	}
+
+	// Obter o número de linhas afetadas
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return 0, err
+	}
+
+	return rowsAffected, nil
+}
